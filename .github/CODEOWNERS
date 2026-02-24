@@ -1,0 +1,17 @@
+# CODEOWNERS — require review from the platform team for critical paths
+#
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Replace <platform-team> with your GitHub team or usernames, e.g.:
+#   @my-org/fabric-platform-team
+#   @alice @bob
+
+# ── Deployment scripts and workflow ─────────────────────────
+deploy/                    @<platform-team>
+.github/workflows/         @<platform-team>
+
+# ── Environment parameterization ────────────────────────────
+config/parameter.yml       @<platform-team>
+
+# ── Dependency changes ──────────────────────────────────────
+requirements.txt           @<platform-team>

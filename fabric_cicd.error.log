@@ -1,0 +1,34 @@
+2026-02-25 10:47:12,925 - ERROR - fabric-cicd-deploy - Deployment failed.
+Traceback (most recent call last):
+  File "C:\repo\FABRIC-CICD-PROJECT\.venv\Lib\site-packages\fabric_cicd\_common\_fabric_endpoint.py", line 197, in _refresh_token
+    self.aad_token = self.token_credential.get_token(resource_url).token
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\repo\FABRIC-CICD-PROJECT\.venv\Lib\site-packages\azure\identity\_internal\get_token_mixin.py", line 93, in get_token
+    token_info = self._get_token_base(*scopes, options=options, base_method_name="get_token", **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\repo\FABRIC-CICD-PROJECT\.venv\Lib\site-packages\azure\identity\_internal\get_token_mixin.py", line 137, in _get_token_base
+    token = self._request_token(
+            ^^^^^^^^^^^^^^^^^^^^
+  File "C:\repo\FABRIC-CICD-PROJECT\.venv\Lib\site-packages\azure\identity\_internal\decorators.py", line 67, in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\repo\FABRIC-CICD-PROJECT\.venv\Lib\site-packages\azure\identity\_internal\client_credential_base.py", line 49, in _request_token
+    raise ClientAuthenticationError(message=message)
+azure.core.exceptions.ClientAuthenticationError: Authentication failed: AADSTS700016: Application with identifier '432a052b-f977-4d2b-b076-c95229b60219' was not found in the directory 'Contoso'. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You may have sent your authentication request to the wrong tenant. Trace ID: c26b75a7-f077-4b08-afe8-2b6261cf1800 Correlation ID: 3ee3de46-aaeb-434d-b0fb-2275c6b03734 Timestamp: 2026-02-24 23:47:16Z
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\repo\FABRIC-CICD-PROJECT\deploy\deploy_workspace.py", line 204, in main
+    deploy(
+  File "C:\repo\FABRIC-CICD-PROJECT\deploy\deploy_workspace.py", line 142, in deploy
+    workspace = FabricWorkspace(
+                ^^^^^^^^^^^^^^^^
+  File "C:\repo\FABRIC-CICD-PROJECT\.venv\Lib\site-packages\fabric_cicd\fabric_workspace.py", line 102, in __init__
+    self.endpoint = FabricEndpoint(
+                    ^^^^^^^^^^^^^^^
+  File "C:\repo\FABRIC-CICD-PROJECT\.venv\Lib\site-packages\fabric_cicd\_common\_fabric_endpoint.py", line 28, in __init__
+    self._refresh_token()
+  File "C:\repo\FABRIC-CICD-PROJECT\.venv\Lib\site-packages\fabric_cicd\_common\_fabric_endpoint.py", line 200, in _refresh_token
+    raise TokenError(msg, logger) from e
+fabric_cicd._common._exceptions.TokenError: Failed to aquire AAD token. Authentication failed: AADSTS700016: Application with identifier '432a052b-f977-4d2b-b076-c95229b60219' was not found in the directory 'Contoso'. This can happen if the application has not been installed by the administrator of the tenant or consented to by any user in the tenant. You may have sent your authentication request to the wrong tenant. Trace ID: c26b75a7-f077-4b08-afe8-2b6261cf1800 Correlation ID: 3ee3de46-aaeb-434d-b0fb-2275c6b03734 Timestamp: 2026-02-24 23:47:16Z
