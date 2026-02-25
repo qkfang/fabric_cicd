@@ -90,11 +90,11 @@ for first, last, company, email, phone in test_customers:
         INSERT INTO SalesLT.Customer
             (NameStyle, FirstName, LastName, CompanyName,
              EmailAddress, Phone, PasswordHash, PasswordSalt)
+        OUTPUT INSERTED.CustomerID
         VALUES (0, ?, ?, ?, ?, ?, 'AL5GmDvR4s4=', 'HFEdB5A=')
         """,
         first, last, company, email, phone,
     )
-    cursor.execute("SELECT SCOPE_IDENTITY()")
     seed_customer_ids.append(int(cursor.fetchone()[0]))
 conn.commit()
 print(f"Inserted {len(seed_customer_ids)} test customers → IDs: {seed_customer_ids}")
@@ -108,12 +108,12 @@ for cust_id, subtotals in zip(seed_customer_ids, orders_per_customer):
             """
             INSERT INTO SalesLT.SalesOrderHeader
                 (DueDate, CustomerID, ShipMethod, SubTotal, TaxAmt, Freight)
+            OUTPUT INSERTED.SalesOrderID
             VALUES
                 (DATEADD(DAY, 14, GETDATE()), ?, 'CARGO TRANSPORT 5', ?, ?, ?)
             """,
             cust_id, subtotal, tax, freight,
         )
-        cursor.execute("SELECT SCOPE_IDENTITY()")
         seed_order_ids.append(int(cursor.fetchone()[0]))
 conn.commit()
 print(f"Inserted {len(seed_order_ids)} test sales orders → IDs: {seed_order_ids}")
