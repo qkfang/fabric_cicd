@@ -38,17 +38,15 @@ logger = logging.getLogger("fabric-cicd-deploy")
 DEFAULT_REPO_DIR = "./workspace"
 DEFAULT_ITEM_TYPES = [
     "Notebook",
-    "DataPipeline",
     "SemanticModel",
     "Report",
     "Environment",
-    "Lakehouse",
-    "Warehouse",
-    "KQLDatabase",
-    "Eventstream",
-    "MLModel",
-    "MLExperiment",
-    "SparkJobDefinition",
+]
+
+# DataPipeline is only supported with User Identity (UPN) authentication.
+# Add it back if you switch away from Service Principal auth.
+UPN_ONLY_ITEM_TYPES = [
+    "DataPipeline",
 ]
 MAX_RETRIES = 3
 RETRY_BACKOFF_SECONDS = 10
