@@ -1,6 +1,3 @@
-# Load .env variables (bash)
-export $(grep -v '^#' .env | xargs)
-
 # Or on Windows PowerShell
 Get-Content .env | ForEach-Object {
     if ($_ -match '^([^#][^=]+)=(.*)$') {
