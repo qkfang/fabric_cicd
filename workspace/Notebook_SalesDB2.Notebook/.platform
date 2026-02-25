@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "Notebook_SalesDB2",
+    "description": "Analytics notebook for Sales_DB_02"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "f3a91b2c-7d4e-4c85-a6f3-8b2e1d9c047a"
+  }
+}
