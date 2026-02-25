@@ -20,6 +20,8 @@ trigger:
       - config/**
       - deploy/**
 
+pool:
+  name: Azure Pipelines
 
 variables:
   - group: fabric-cicd
