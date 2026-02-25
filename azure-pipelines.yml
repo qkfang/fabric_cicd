@@ -51,12 +51,13 @@ stages:
               sudo apt-get update
               sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
               sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
+              python -m ensurepip --upgrade
               python --version
             displayName: Set up Python $(pythonVersion)
 
           - script: |
               python -m pip install --upgrade pip
-              pip install -r requirements.txt
+              python -m pip install -r requirements.txt
             displayName: Install dependencies
 
           - script: ruff check .
@@ -88,10 +89,13 @@ stages:
                     sudo apt-get update
                     sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
                     sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
+                    python -m ensurepip --upgrade
                     python --version
                   displayName: Set up Python $(pythonVersion)
 
-                - script: pip install -r requirements.txt
+                - script: |
+                    python -m pip install --upgrade pip
+                    python -m pip install -r requirements.txt
                   displayName: Install dependencies
 
                 - script: python deploy/deploy_workspace.py
@@ -126,10 +130,13 @@ stages:
                     sudo apt-get update
                     sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
                     sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
+                    python -m ensurepip --upgrade
                     python --version
                   displayName: Set up Python $(pythonVersion)
 
-                - script: pip install -r requirements.txt
+                - script: |
+                    python -m pip install --upgrade pip
+                    python -m pip install -r requirements.txt
                   displayName: Install dependencies
 
                 - script: python deploy/deploy_workspace.py
@@ -164,10 +171,13 @@ stages:
                     sudo apt-get update
                     sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
                     sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
+                    python -m ensurepip --upgrade
                     python --version
                   displayName: Set up Python $(pythonVersion)
 
-                - script: pip install -r requirements.txt
+                - script: |
+                    python -m pip install --upgrade pip
+                    python -m pip install -r requirements.txt
                   displayName: Install dependencies
 
                 - script: python deploy/deploy_workspace.py
