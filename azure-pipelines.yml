@@ -1,0 +1,160 @@
+# Azure DevOps Pipeline — Microsoft Fabric CI/CD
+# Deploys Fabric workspace items: DEV → QA (with approval) → PROD (with approval)
+#
+# Prerequisites:
+#   1. Create Azure DevOps environments "DEV", "QA", "PROD" with approval gates on QA and PROD.
+#   2. Create a variable group "fabric-cicd" with:
+#        FABRIC_TENANT_ID, FABRIC_CLIENT_ID, FABRIC_CLIENT_SECRET
+#        DEV_WORKSPACE_ID, QA_WORKSPACE_ID, PROD_WORKSPACE_ID
+#      Mark secrets as secret variables.
+#   3. Optionally use per-environment service principals:
+#        DEV_TENANT_ID, DEV_CLIENT_ID, DEV_CLIENT_SECRET, etc.
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - workspace/**
+      - config/**
+      - deploy/**
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - group: fabric-cicd
+  - name: pythonVersion
+    value: '3.10'
+  - name: REPO_DIR
+    value: './workspace'
+  - name: PARAMETER_FILE
+    value: './config/parameter.yml'
+
+stages:
+  # ──────────────────────────────────────────────────
+  # Validate
+  # ──────────────────────────────────────────────────
+  - stage: Validate
+    displayName: Validate & Lint
+    jobs:
+      - job: ValidateAndLint
+        displayName: Validate repo & lint
+        steps:
+          - checkout: self
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: $(pythonVersion)
+            displayName: Set up Python $(pythonVersion)
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+            displayName: Install dependencies
+
+          - script: ruff check .
+            displayName: Lint with Ruff
+
+          - script: python deploy/validate_repo.py
+            displayName: Validate repository structure
+
+  # ──────────────────────────────────────────────────
+  # Deploy to DEV
+  # ──────────────────────────────────────────────────
+  - stage: DeployDEV
+    displayName: Deploy to DEV
+    dependsOn: Validate
+    jobs:
+      - deployment: DeployDEV
+        displayName: Deploy to DEV workspace
+        environment: DEV
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: UsePythonVersion@0
+                  inputs:
+                    versionSpec: $(pythonVersion)
+                  displayName: Set up Python $(pythonVersion)
+
+                - script: pip install -r requirements.txt
+                  displayName: Install dependencies
+
+                - script: python deploy/deploy_workspace.py
+                  displayName: Deploy to DEV
+                  env:
+                    TARGET_ENVIRONMENT: DEV
+                    TARGET_WORKSPACE_ID: $(DEV_WORKSPACE_ID)
+                    FABRIC_TENANT_ID: $(FABRIC_TENANT_ID)
+                    FABRIC_CLIENT_ID: $(FABRIC_CLIENT_ID)
+                    FABRIC_CLIENT_SECRET: $(FABRIC_CLIENT_SECRET)
+
+  # ──────────────────────────────────────────────────
+  # Deploy to QA (requires approval on the QA environment)
+  # ──────────────────────────────────────────────────
+  - stage: DeployQA
+    displayName: Deploy to QA
+    dependsOn: DeployDEV
+    jobs:
+      - deployment: DeployQA
+        displayName: Deploy to QA workspace
+        environment: QA
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: UsePythonVersion@0
+                  inputs:
+                    versionSpec: $(pythonVersion)
+                  displayName: Set up Python $(pythonVersion)
+
+                - script: pip install -r requirements.txt
+                  displayName: Install dependencies
+
+                - script: python deploy/deploy_workspace.py
+                  displayName: Deploy to QA
+                  env:
+                    TARGET_ENVIRONMENT: QA
+                    TARGET_WORKSPACE_ID: $(QA_WORKSPACE_ID)
+                    FABRIC_TENANT_ID: $(FABRIC_TENANT_ID)
+                    FABRIC_CLIENT_ID: $(FABRIC_CLIENT_ID)
+                    FABRIC_CLIENT_SECRET: $(FABRIC_CLIENT_SECRET)
+
+  # ──────────────────────────────────────────────────
+  # Deploy to PROD (requires approval on the PROD environment)
+  # ──────────────────────────────────────────────────
+  - stage: DeployPROD
+    displayName: Deploy to PROD
+    dependsOn: DeployQA
+    jobs:
+      - deployment: DeployPROD
+        displayName: Deploy to PROD workspace
+        environment: PROD
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: UsePythonVersion@0
+                  inputs:
+                    versionSpec: $(pythonVersion)
+                  displayName: Set up Python $(pythonVersion)
+
+                - script: pip install -r requirements.txt
+                  displayName: Install dependencies
+
+                - script: python deploy/deploy_workspace.py
+                  displayName: Deploy to PROD
+                  env:
+                    TARGET_ENVIRONMENT: PROD
+                    TARGET_WORKSPACE_ID: $(PROD_WORKSPACE_ID)
+                    FABRIC_TENANT_ID: $(FABRIC_TENANT_ID)
+                    FABRIC_CLIENT_ID: $(FABRIC_CLIENT_ID)
+                    FABRIC_CLIENT_SECRET: $(FABRIC_CLIENT_SECRET)
