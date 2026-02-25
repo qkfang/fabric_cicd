@@ -22,8 +22,9 @@ import pyodbc
 from IPython.display import display
 from notebookutils import mssparkutils
 
-# Fabric SQL endpoint — update these to match your workspace
-FABRIC_SERVER   = os.environ.get("FABRIC_SQL_SERVER",   "00000000-0000-0000-0000-000000000001.database.fabric.microsoft.com")
+# Fabric SQL endpoint — these must be set to match your Fabric workspace.
+# Note: FABRIC_SQL_SERVER has no usable default; set it as an environment variable.
+FABRIC_SERVER   = os.environ["FABRIC_SQL_SERVER"]
 FABRIC_DATABASE = os.environ.get("FABRIC_SQL_DATABASE", "Sales_DB_02")
 
 # Acquire an AAD token scoped to Azure SQL / Fabric SQL

@@ -13,6 +13,7 @@ CREATE TABLE [dbo].[SalesOrder] (
     [ModifiedDate]  DATETIME         CONSTRAINT [DF_SalesOrder_ModifiedDate] DEFAULT (getdate()) NOT NULL,
     CONSTRAINT [PK_SalesOrder_SalesOrderID] PRIMARY KEY CLUSTERED ([SalesOrderID] ASC),
     CONSTRAINT [CK_SalesOrder_DueDate] CHECK ([DueDate] >= [OrderDate]),
+    CONSTRAINT [CK_SalesOrder_ShipDate] CHECK ([ShipDate] >= [OrderDate] OR [ShipDate] IS NULL),
     CONSTRAINT [CK_SalesOrder_Status] CHECK ([Status] >= (0) AND [Status] <= (8)),
     CONSTRAINT [CK_SalesOrder_SubTotal] CHECK ([SubTotal] >= (0.00)),
     CONSTRAINT [CK_SalesOrder_TaxAmt] CHECK ([TaxAmt] >= (0.00)),

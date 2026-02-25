@@ -15,12 +15,6 @@ CREATE TABLE [dbo].[Customer] (
 
 GO
 
-CREATE NONCLUSTERED INDEX [IX_Customer_Email]
-    ON [dbo].[Customer]([Email] ASC);
-
-
-GO
-
 CREATE NONCLUSTERED INDEX [IX_Customer_RegionID]
     ON [dbo].[Customer]([RegionID] ASC);
 
