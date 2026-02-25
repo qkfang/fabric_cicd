@@ -16,7 +16,6 @@ from __future__ import annotations
 import logging
 import os
 import sys
-import time
 from datetime import datetime, timezone
 
 from azure.identity import ClientSecretCredential
@@ -49,8 +48,6 @@ DEFAULT_ITEM_TYPES = [
 UPN_ONLY_ITEM_TYPES = [
     "DataPipeline",
 ]
-MAX_RETRIES = 3
-RETRY_BACKOFF_SECONDS = 10
 VALID_ENVIRONMENTS = {"DEV", "QA", "PROD"}
 
 
@@ -146,33 +143,16 @@ def deploy(
         token_credential=credential,
     )
 
-    # Publish all items with retry logic
-    for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            logger.info("Publishing items (attempt %d/%d)…", attempt, MAX_RETRIES)
-            publish_all_items(workspace)
-            logger.info("Publish completed successfully.")
-            break
-        except Exception as exc:
-            logger.warning("Publish attempt %d failed: %s", attempt, exc)
-            if attempt == MAX_RETRIES:
-                raise
-            logger.info("Retrying in %d seconds…", RETRY_BACKOFF_SECONDS * attempt)
-            time.sleep(RETRY_BACKOFF_SECONDS * attempt)
+    # Publish all items
+    logger.info("Publishing items…")
+    publish_all_items(workspace)
+    logger.info("Publish completed successfully.")
 
     # Optionally remove orphaned items
     if clean_orphans:
         logger.info("Removing orphaned items not present in repository…")
-        for attempt in range(1, MAX_RETRIES + 1):
-            try:
-                unpublish_all_orphan_items(workspace)
-                logger.info("Orphan cleanup completed successfully.")
-                break
-            except Exception as exc:
-                logger.warning("Orphan cleanup attempt %d failed: %s", attempt, exc)
-                if attempt == MAX_RETRIES:
-                    raise
-                time.sleep(RETRY_BACKOFF_SECONDS * attempt)
+        unpublish_all_orphan_items(workspace)
+        logger.info("Orphan cleanup completed successfully.")
 
     logger.info("DEPLOYMENT FINISHED SUCCESSFULLY.")
 
