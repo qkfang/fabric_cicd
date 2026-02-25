@@ -50,7 +50,85 @@ print(f"Connected to {FABRIC_DATABASE} on {FABRIC_SERVER} ✓")
 # CELL ********************
 
 # ─────────────────────────────────────────────
-# Cell 2 – Top 10 Customers by Total Revenue
+# Cell 2 – Seed test data for Top Customers query
+# Inserts 10 customers + matching sales orders so the
+# revenue query returns meaningful results.
+# Run the cleanup cell at the end to remove this data.
+# ─────────────────────────────────────────────
+
+test_customers = [
+    ("Alice",  "Chen",     "Tailspin Traders",     "alice.chen@tailspin.com",       "206-555-0201"),
+    ("Bob",    "Patel",    "Northwind Traders",    "bob.patel@northwind.com",        "425-555-0202"),
+    ("Carol",  "Smith",    "Fabrikam Inc",         "carol.smith@fabrikam.com",       "253-555-0203"),
+    ("David",  "Kim",      "Contoso Electronics",  "david.kim@contoso-elec.com",     "360-555-0204"),
+    ("Eva",    "Johnson",  "Adventure Works",      "eva.johnson@adventure.com",      "509-555-0205"),
+    ("Frank",  "Lopez",    "Fourth Coffee",        "frank.lopez@fourthcoffee.com",   "206-555-0206"),
+    ("Grace",  "Williams", "Proseware Inc",        "grace.williams@proseware.com",   "425-555-0207"),
+    ("Henry",  "Brown",    "Woodgrove Bank",       "henry.brown@woodgrove.com",      "253-555-0208"),
+    ("Iris",   "Davis",    "Lucerne Publishing",   "iris.davis@lucerne.com",         "360-555-0209"),
+    ("James",  "Wilson",   "Graphic Design Inst",  "james.wilson@graphicdesign.com", "509-555-0210"),
+]
+
+# Revenue profile per customer: list of SubTotal values (one entry = one order)
+orders_per_customer = [
+    [48500.00, 32000.00, 21000.00],  # Alice  → ~$101 500
+    [44000.00, 28000.00],            # Bob    → ~$ 72 000
+    [39000.00, 25000.00, 18000.00],  # Carol  → ~$ 82 000
+    [35000.00, 22000.00],            # David  → ~$ 57 000
+    [30000.00, 19000.00, 12000.00],  # Eva    → ~$ 61 000
+    [27000.00, 15000.00],            # Frank  → ~$ 42 000
+    [24000.00, 14000.00,  9500.00],  # Grace  → ~$ 47 500
+    [21000.00, 11000.00],            # Henry  → ~$ 32 000
+    [18500.00,  9000.00,  6000.00],  # Iris   → ~$ 33 500
+    [16000.00,  8000.00],            # James  → ~$ 24 000
+]
+
+seed_customer_ids = []
+for first, last, company, email, phone in test_customers:
+    cursor.execute(
+        """
+        INSERT INTO SalesLT.Customer
+            (NameStyle, FirstName, LastName, CompanyName,
+             EmailAddress, Phone, PasswordHash, PasswordSalt)
+        VALUES (0, ?, ?, ?, ?, ?, 'AL5GmDvR4s4=', 'HFEdB5A=')
+        """,
+        first, last, company, email, phone,
+    )
+    cursor.execute("SELECT SCOPE_IDENTITY()")
+    seed_customer_ids.append(int(cursor.fetchone()[0]))
+conn.commit()
+print(f"Inserted {len(seed_customer_ids)} test customers → IDs: {seed_customer_ids}")
+
+seed_order_ids = []
+for cust_id, subtotals in zip(seed_customer_ids, orders_per_customer):
+    for subtotal in subtotals:
+        tax     = round(subtotal * 0.08, 2)
+        freight = round(subtotal * 0.02, 2)
+        cursor.execute(
+            """
+            INSERT INTO SalesLT.SalesOrderHeader
+                (DueDate, CustomerID, ShipMethod, SubTotal, TaxAmt, Freight)
+            VALUES
+                (DATEADD(DAY, 14, GETDATE()), ?, 'CARGO TRANSPORT 5', ?, ?, ?)
+            """,
+            cust_id, subtotal, tax, freight,
+        )
+        cursor.execute("SELECT SCOPE_IDENTITY()")
+        seed_order_ids.append(int(cursor.fetchone()[0]))
+conn.commit()
+print(f"Inserted {len(seed_order_ids)} test sales orders → IDs: {seed_order_ids}")
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+# ─────────────────────────────────────────────
+# Cell 3 – Top 10 Customers by Total Revenue
 # ─────────────────────────────────────────────
 sql_top_customers = """
 SELECT TOP 10
@@ -79,7 +157,7 @@ display(df_top_customers)
 # CELL ********************
 
 # ─────────────────────────────────────────────
-# Cell 3 – Monthly Sales Trend (current year)
+# Cell 4 – Monthly Sales Trend (current year)
 # ─────────────────────────────────────────────
 sql_monthly_sales = """
 SELECT
@@ -108,7 +186,7 @@ display(df_monthly)
 # CELL ********************
 
 # ─────────────────────────────────────────────
-# Cell 4 – Revenue by Product Category
+# Cell 5 – Revenue by Product Category
 # ─────────────────────────────────────────────
 sql_category_revenue = """
 SELECT
@@ -137,7 +215,7 @@ display(df_categories)
 # CELL ********************
 
 # ─────────────────────────────────────────────
-# Cell 5 – Top 10 Best-Selling Products
+# Cell 6 – Top 10 Best-Selling Products
 # ─────────────────────────────────────────────
 sql_best_sellers = """
 SELECT TOP 10
@@ -168,7 +246,7 @@ display(df_best_sellers)
 # CELL ********************
 
 # ─────────────────────────────────────────────
-# Cell 6 – Average Order Value by Customer Segment
+# Cell 7 – Average Order Value by Customer Segment
 # ─────────────────────────────────────────────
 sql_aov = """
 SELECT
@@ -207,7 +285,7 @@ display(df_segment)
 # CELL ********************
 
 # ─────────────────────────────────────────────
-# Cell 7 – INSERT: Add a new customer
+# Cell 8 – INSERT: Add a new customer
 # ─────────────────────────────────────────────
 sql_insert_customer = """
 INSERT INTO SalesLT.Customer
@@ -242,7 +320,7 @@ new_customer_id = row.CustomerID
 # CELL ********************
 
 # ─────────────────────────────────────────────
-# Cell 8 – UPDATE: Change the new customer's phone
+# Cell 9 – UPDATE: Change the new customer's phone
 # ─────────────────────────────────────────────
 sql_update_customer = """
 UPDATE SalesLT.Customer
@@ -273,7 +351,7 @@ print(f"Verified Phone: {row.Phone}")
 # CELL ********************
 
 # ─────────────────────────────────────────────
-# Cell 9 – DELETE: Remove the demo customer
+# Cell 10 – DELETE: Remove the demo customer
 # ─────────────────────────────────────────────
 sql_delete_customer = "DELETE FROM SalesLT.Customer WHERE CustomerID = ?;"
 
@@ -299,7 +377,7 @@ print(f"Rows remaining for CustomerID {new_customer_id}: {count}")
 # CELL ********************
 
 # ─────────────────────────────────────────────
-# Cell 10 – Products with Low Stock / No Recent Orders
+# Cell 11 – Products with Low Stock / No Recent Orders
 # ─────────────────────────────────────────────
 sql_no_recent_orders = """
 SELECT
@@ -332,6 +410,57 @@ display(df_stale.head(20))
 cursor.close()
 conn.close()
 print("\nConnection closed.")
+
+# METADATA ********************
+
+# META {
+# META   "language": "python",
+# META   "language_group": "synapse_pyspark"
+# META }
+
+# CELL ********************
+
+# ─────────────────────────────────────────────
+# Cell 12 – Cleanup: Remove seed test data
+# Deletes the orders and customers inserted in Cell 2.
+# Run this cell after verifying the Top Customers query.
+# ─────────────────────────────────────────────
+
+# Re-open connection for cleanup (Cell 11 closes it)
+token2        = mssparkutils.credentials.getToken("https://database.windows.net/")
+token2_bytes  = token2.encode("UTF-16-LE")
+token2_struct = struct.pack(f"<I{len(token2_bytes)}s", len(token2_bytes), token2_bytes)
+
+conn2   = pyodbc.connect(
+    f"Driver={{ODBC Driver 18 for SQL Server}};"
+    f"Server={FABRIC_SERVER};"
+    f"Database={FABRIC_DATABASE};",
+    attrs_before={1256: token2_struct},
+)
+cursor2 = conn2.cursor()
+
+# Delete seeded orders first (FK constraint)
+if seed_order_ids:
+    placeholders = ",".join(["?"] * len(seed_order_ids))
+    cursor2.execute(
+        f"DELETE FROM SalesLT.SalesOrderHeader WHERE SalesOrderID IN ({placeholders})",
+        *seed_order_ids,
+    )
+    print(f"Deleted {cursor2.rowcount} seeded sales orders.")
+
+# Delete seeded customers
+if seed_customer_ids:
+    placeholders = ",".join(["?"] * len(seed_customer_ids))
+    cursor2.execute(
+        f"DELETE FROM SalesLT.Customer WHERE CustomerID IN ({placeholders})",
+        *seed_customer_ids,
+    )
+    print(f"Deleted {cursor2.rowcount} seeded customers.")
+
+conn2.commit()
+cursor2.close()
+conn2.close()
+print("Seed data cleanup complete.")
 
 # METADATA ********************
 
