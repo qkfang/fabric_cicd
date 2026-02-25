@@ -308,7 +308,7 @@ SELECT
     p.ListPrice,
     p.SellStartDate,
     p.SellEndDate,
-    ISNULL(latest.LastOrderDate, 'Never') AS LastOrderDate
+    ISNULL(CONVERT(VARCHAR(20), latest.LastOrderDate, 23), 'Never') AS LastOrderDate
 FROM SalesLT.Product p
 LEFT JOIN (
     SELECT
