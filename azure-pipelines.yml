@@ -20,8 +20,6 @@ trigger:
       - config/**
       - deploy/**
 
-pool:
-  vmImage: ubuntu-latest
 
 variables:
   - group: fabric-cicd
