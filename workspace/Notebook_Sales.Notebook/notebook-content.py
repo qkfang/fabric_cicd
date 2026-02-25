@@ -23,8 +23,8 @@ from IPython.display import display
 from notebookutils import mssparkutils
 
 # Fabric SQL endpoint — update these to match your workspace
-FABRIC_SERVER   = os.environ.get("FABRIC_SQL_SERVER",   "<workspace>.datawarehouse.fabric.microsoft.com")
-FABRIC_DATABASE = os.environ.get("FABRIC_SQL_DATABASE", "SaleLT")
+FABRIC_SERVER   = os.environ.get("FABRIC_SQL_SERVER",   "zylcdhpgv7uezc6dy7d3ngcwyi-kmmmko2hhaeunmdplvelcbfeyu.database.fabric.microsoft.com")
+FABRIC_DATABASE = os.environ.get("FABRIC_SQL_DATABASE", "FSI_DB_01-839d49e5-cc0f-4c85-8637-adcd81a5c58a")
 
 # Acquire an AAD token scoped to Azure SQL / Fabric SQL
 token       = mssparkutils.credentials.getToken("https://database.windows.net/")
