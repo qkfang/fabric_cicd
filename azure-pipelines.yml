@@ -26,7 +26,7 @@ pool:
 variables:
   - group: fabric-cicd
   - name: pythonVersion
-    value: '3.10'
+    value: '3.12'
   - name: REPO_DIR
     value: './workspace'
   - name: PARAMETER_FILE
