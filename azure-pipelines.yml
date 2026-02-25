@@ -50,20 +50,24 @@ stages:
               sudo add-apt-repository -y ppa:deadsnakes/ppa
               sudo apt-get update
               sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
-              sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
-              curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python$(pythonVersion)
               python$(pythonVersion) --version
+              python$(pythonVersion) -m venv $(Agent.TempDirectory)/venv
             displayName: Set up Python $(pythonVersion)
 
           - script: |
-              python$(pythonVersion) -m pip install --upgrade pip
-              python$(pythonVersion) -m pip install -r requirements.txt
+              source $(Agent.TempDirectory)/venv/bin/activate
+              pip install --upgrade pip
+              pip install -r requirements.txt
             displayName: Install dependencies
 
-          - script: ruff check .
+          - script: |
+              source $(Agent.TempDirectory)/venv/bin/activate
+              ruff check .
             displayName: Lint with Ruff
 
-          - script: python deploy/validate_repo.py
+          - script: |
+              source $(Agent.TempDirectory)/venv/bin/activate
+              python deploy/validate_repo.py
             displayName: Validate repository structure
 
   # ──────────────────────────────────────────────────
@@ -88,17 +92,19 @@ stages:
                     sudo add-apt-repository -y ppa:deadsnakes/ppa
                     sudo apt-get update
                     sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
-                    sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
-                    curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python$(pythonVersion)
                     python$(pythonVersion) --version
+                    python$(pythonVersion) -m venv $(Agent.TempDirectory)/venv
                   displayName: Set up Python $(pythonVersion)
 
                 - script: |
-                    python$(pythonVersion) -m pip install --upgrade pip
-                    python$(pythonVersion) -m pip install -r requirements.txt
+                    source $(Agent.TempDirectory)/venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
                   displayName: Install dependencies
 
-                - script: python$(pythonVersion) deploy/deploy_workspace.py
+                - script: |
+                    source $(Agent.TempDirectory)/venv/bin/activate
+                    python deploy/deploy_workspace.py
                   displayName: Deploy to DEV
                   env:
                     TARGET_ENVIRONMENT: DEV
@@ -129,17 +135,19 @@ stages:
                     sudo add-apt-repository -y ppa:deadsnakes/ppa
                     sudo apt-get update
                     sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
-                    sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
-                    curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python$(pythonVersion)
                     python$(pythonVersion) --version
+                    python$(pythonVersion) -m venv $(Agent.TempDirectory)/venv
                   displayName: Set up Python $(pythonVersion)
 
                 - script: |
-                    python$(pythonVersion) -m pip install --upgrade pip
-                    python$(pythonVersion) -m pip install -r requirements.txt
+                    source $(Agent.TempDirectory)/venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
                   displayName: Install dependencies
 
-                - script: python$(pythonVersion) deploy/deploy_workspace.py
+                - script: |
+                    source $(Agent.TempDirectory)/venv/bin/activate
+                    python deploy/deploy_workspace.py
                   displayName: Deploy to QA
                   env:
                     TARGET_ENVIRONMENT: QA
@@ -170,17 +178,19 @@ stages:
                     sudo add-apt-repository -y ppa:deadsnakes/ppa
                     sudo apt-get update
                     sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
-                    sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
-                    curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python$(pythonVersion)
                     python$(pythonVersion) --version
+                    python$(pythonVersion) -m venv $(Agent.TempDirectory)/venv
                   displayName: Set up Python $(pythonVersion)
 
                 - script: |
-                    python$(pythonVersion) -m pip install --upgrade pip
-                    python$(pythonVersion) -m pip install -r requirements.txt
+                    source $(Agent.TempDirectory)/venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
                   displayName: Install dependencies
 
-                - script: python$(pythonVersion) deploy/deploy_workspace.py
+                - script: |
+                    source $(Agent.TempDirectory)/venv/bin/activate
+                    python deploy/deploy_workspace.py
                   displayName: Deploy to PROD
                   env:
                     TARGET_ENVIRONMENT: PROD
