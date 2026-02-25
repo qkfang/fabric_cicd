@@ -44,9 +44,14 @@ stages:
         steps:
           - checkout: self
 
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: $(pythonVersion)
+          - script: |
+              sudo apt-get update
+              sudo apt-get install -y software-properties-common
+              sudo add-apt-repository -y ppa:deadsnakes/ppa
+              sudo apt-get update
+              sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
+              sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
+              python --version
             displayName: Set up Python $(pythonVersion)
 
           - script: |
@@ -76,9 +81,14 @@ stages:
               steps:
                 - checkout: self
 
-                - task: UsePythonVersion@0
-                  inputs:
-                    versionSpec: $(pythonVersion)
+                - script: |
+                    sudo apt-get update
+                    sudo apt-get install -y software-properties-common
+                    sudo add-apt-repository -y ppa:deadsnakes/ppa
+                    sudo apt-get update
+                    sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
+                    sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
+                    python --version
                   displayName: Set up Python $(pythonVersion)
 
                 - script: pip install -r requirements.txt
@@ -109,9 +119,14 @@ stages:
               steps:
                 - checkout: self
 
-                - task: UsePythonVersion@0
-                  inputs:
-                    versionSpec: $(pythonVersion)
+                - script: |
+                    sudo apt-get update
+                    sudo apt-get install -y software-properties-common
+                    sudo add-apt-repository -y ppa:deadsnakes/ppa
+                    sudo apt-get update
+                    sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
+                    sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
+                    python --version
                   displayName: Set up Python $(pythonVersion)
 
                 - script: pip install -r requirements.txt
@@ -142,9 +157,14 @@ stages:
               steps:
                 - checkout: self
 
-                - task: UsePythonVersion@0
-                  inputs:
-                    versionSpec: $(pythonVersion)
+                - script: |
+                    sudo apt-get update
+                    sudo apt-get install -y software-properties-common
+                    sudo add-apt-repository -y ppa:deadsnakes/ppa
+                    sudo apt-get update
+                    sudo apt-get install -y python$(pythonVersion) python$(pythonVersion)-venv python$(pythonVersion)-dev
+                    sudo update-alternatives --install /usr/bin/python python /usr/bin/python$(pythonVersion) 1
+                    python --version
                   displayName: Set up Python $(pythonVersion)
 
                 - script: pip install -r requirements.txt
