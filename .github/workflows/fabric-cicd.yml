@@ -107,6 +107,16 @@ jobs:
           ITEMS_IN_SCOPE:      ${{ env.ITEMS_IN_SCOPE }}
           CLEAN_ORPHANS:       ${{ env.CLEAN_ORPHANS }}
 
+      - name: Print fabric_cicd error log
+        if: always()
+        run: |
+          if [ -f fabric_cicd.error.log ]; then
+            echo "=== fabric_cicd.error.log ==="
+            cat fabric_cicd.error.log
+          else
+            echo "No fabric_cicd.error.log file found."
+          fi
+
       - name: Job summary
         if: always()
         run: |
@@ -157,6 +167,16 @@ jobs:
           ITEMS_IN_SCOPE:      ${{ env.ITEMS_IN_SCOPE }}
           CLEAN_ORPHANS:       ${{ env.CLEAN_ORPHANS }}
 
+      - name: Print fabric_cicd error log
+        if: always()
+        run: |
+          if [ -f fabric_cicd.error.log ]; then
+            echo "=== fabric_cicd.error.log ==="
+            cat fabric_cicd.error.log
+          else
+            echo "No fabric_cicd.error.log file found."
+          fi
+
       - name: Job summary
         if: always()
         run: |
@@ -206,6 +226,16 @@ jobs:
           REPO_DIR:            ${{ env.REPO_DIR }}
           ITEMS_IN_SCOPE:      ${{ env.ITEMS_IN_SCOPE }}
           CLEAN_ORPHANS:       ${{ env.CLEAN_ORPHANS }}
+
+      - name: Print fabric_cicd error log
+        if: always()
+        run: |
+          if [ -f fabric_cicd.error.log ]; then
+            echo "=== fabric_cicd.error.log ==="
+            cat fabric_cicd.error.log
+          else
+            echo "No fabric_cicd.error.log file found."
+          fi
 
       - name: Job summary
         if: always()
