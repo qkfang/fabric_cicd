@@ -16,8 +16,9 @@
 # ─────────────────────────────────────────────
 import os
 import struct
-import pyodbc
+
 import pandas as pd
+import pyodbc
 from IPython.display import display
 from notebookutils import mssparkutils
 
