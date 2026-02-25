@@ -24,7 +24,7 @@ from notebookutils import mssparkutils
 
 # Fabric SQL endpoint — update these to match your workspace
 FABRIC_SERVER   = os.environ.get("FABRIC_SQL_SERVER",   "zylcdhpgv7uezc6dy7d3ngcwyi-kmmmko2hhaeunmdplvelcbfeyu.database.fabric.microsoft.com")
-FABRIC_DATABASE = os.environ.get("FABRIC_SQL_DATABASE", "FSI_DB_01-839d49e5-cc0f-4c85-8637-adcd81a5c58a")
+FABRIC_DATABASE = os.environ.get("FABRIC_SQL_DATABASE", "FSI_DB_01-0dbbbcd5-5c8b-4667-94d4-915037183d73")
 
 # Acquire an AAD token scoped to Azure SQL / Fabric SQL
 token       = mssparkutils.credentials.getToken("https://database.windows.net/")
@@ -88,7 +88,7 @@ SELECT
     COUNT(*)                         AS TotalOrders,
     ROUND(SUM(SubTotal), 2)          AS SubTotal,
     ROUND(SUM(TaxAmt),   2)          AS TaxAmount,
-    ROUND(SUM(TotalDue), 2)          AS TotalRevenue
+    ROUND(SUM(SubTotal), 2)          AS TotalRevenue
 FROM SalesLT.SalesOrderHeader
 GROUP BY YEAR(OrderDate), MONTH(OrderDate)
 ORDER BY OrderYear, OrderMonth;
@@ -115,7 +115,7 @@ SELECT
     pc.Name                             AS Category,
     COUNT(DISTINCT sod.SalesOrderID)    AS TotalOrders,
     SUM(sod.OrderQty)                   AS UnitsSold,
-    ROUND(SUM(sod.LineTotal), 2)        AS CategoryRevenue
+    ROUND(SUM(sod.UnitPrice), 2)        AS CategoryRevenue
 FROM SalesLT.ProductCategory     pc
 JOIN SalesLT.Product             p   ON pc.ProductCategoryID = p.ProductCategoryID
 JOIN SalesLT.SalesOrderDetail    sod ON p.ProductID          = sod.ProductID
