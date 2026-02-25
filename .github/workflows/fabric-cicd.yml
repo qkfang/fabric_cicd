@@ -33,7 +33,7 @@ concurrency:
 # ── Reusable environment variables ────────────────────────────────────
 env:
   PYTHON_VERSION: "3.11"
-  ITEMS_IN_SCOPE: "Notebook,DataPipeline,SemanticModel,Report,Environment,Lakehouse"
+  ITEMS_IN_SCOPE: "Notebook,SemanticModel,Report,Environment"
   CLEAN_ORPHANS: "false"
   REPO_DIR: "./workspace"
 
