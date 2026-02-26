@@ -1,0 +1,16 @@
+ProductNumber,Name,CategoryName,Color,Size,StandardCost,ListPrice,StockQty
+RB-001,Road Bike Pro 500,Road Bikes,Red,M,850.00,1499.99,25
+RB-002,Road Bike Elite 700,Road Bikes,Black,L,1200.00,2199.99,12
+MB-001,Mountain Bike Trail 200,Mountain Bikes,Blue,M,700.00,1299.99,30
+MB-002,Mountain Bike Summit 400,Mountain Bikes,Silver,L,950.00,1749.99,8
+TB-001,Touring Bike Classic 100,Touring Bikes,White,M,600.00,999.99,20
+HLM-001,Sport Helmet Pro,Helmets,Black,,45.00,89.99,50
+HLM-002,Road Helmet Elite,Helmets,White,,60.00,129.99,40
+GLV-001,Cycling Gloves S,Gloves,Black,S,12.00,24.99,75
+GLV-002,Cycling Gloves M,Gloves,Black,M,12.00,24.99,60
+GLV-003,Cycling Gloves L,Gloves,Black,L,12.00,24.99,5
+JSY-001,Race Jersey Short Sleeve S,Jerseys,Red,S,30.00,59.99,45
+JSY-002,Race Jersey Short Sleeve M,Jerseys,Red,M,30.00,59.99,50
+JSY-003,Race Jersey Short Sleeve L,Jerseys,Red,L,30.00,59.99,9
+ACC-001,Water Bottle Cage,Accessories,,,5.00,12.99,100
+ACC-002,Bike Lock Pro,Accessories,Black,,18.00,39.99,3

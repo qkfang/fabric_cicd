@@ -1,0 +1,16 @@
+FirstName,LastName,CompanyName,EmailAddress,Phone,RegionCode
+Alice,Chen,Tailspin Traders,alice.chen@tailspin.com,206-555-0201,NA-NW
+Bob,Patel,Northwind Traders,bob.patel@northwind.com,425-555-0202,NA-NW
+Carol,Smith,Fabrikam Inc,carol.smith@fabrikam.com,253-555-0203,NA-SW
+David,Kim,Contoso Electronics,david.kim@contoso-elec.com,360-555-0204,NA-SW
+Eva,Johnson,Adventure Works,eva.johnson@adventure.com,509-555-0205,NA-NE
+Frank,Lopez,Fourth Coffee,frank.lopez@fourthcoffee.com,206-555-0206,NA-NE
+Grace,Williams,Proseware Inc,grace.williams@proseware.com,425-555-0207,NA-SE
+Henry,Brown,Woodgrove Bank,henry.brown@woodgrove.com,253-555-0208,NA-SE
+Iris,Davis,Lucerne Publishing,iris.davis@lucerne.com,360-555-0209,NA-MW
+James,Wilson,Graphic Design Inst,james.wilson@graphicdesign.com,509-555-0210,NA-MW
+Sophie,Taylor,Blue Yonder Airlines,sophie.taylor@blueyonder.com,44-20-7946-0201,EU-UK
+Liam,Fischer,Datum Corporation,liam.fischer@datum.com,49-89-7946-0202,EU-DE
+Amélie,Dupont,Coho Winery,amelie.dupont@coho.com,33-1-7946-0203,EU-FR
+Oliver,Nguyen,Relecloud,oliver.nguyen@relecloud.com,61-2-7946-0204,AP-AU
+Yuki,Tanaka,Bellows College,yuki.tanaka@bellows.com,81-3-7946-0205,AP-JP
