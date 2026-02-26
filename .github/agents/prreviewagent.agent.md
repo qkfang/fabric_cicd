@@ -1,7 +1,6 @@
 ---
 name: prreviewagent
 description: Reviews pull requests for the fabric-cicd repository, covering SQL database changes, Fabric workspace items (Notebooks, Reports), deployment configuration, and CI/CD pipeline hygiene.
-argument-hint: Provide the PR number or a description of the changes to review. Example: "Review PR #42" or "Review changes to SalesOrderHeader.sql and parameter.yml".
 tools: ['read', 'search', 'web']
 ---
 
