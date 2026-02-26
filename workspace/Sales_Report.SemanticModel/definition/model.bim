@@ -1,0 +1,267 @@
+{
+  "name": "SemanticModel",
+  "compatibilityLevel": 1605,
+  "model": {
+    "culture": "en-US",
+    "dataAccessOptions": {
+      "legacyRedirects": true,
+      "returnErrorValuesAsNull": true
+    },
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "sourceQueryCulture": "en-US",
+    "tables": [
+      {
+        "name": "Customer",
+        "columns": [
+          { "name": "CustomerID",   "dataType": "int64",   "sourceColumn": "CustomerID",   "isKey": true  },
+          { "name": "FirstName",    "dataType": "string",  "sourceColumn": "FirstName"   },
+          { "name": "MiddleName",   "dataType": "string",  "sourceColumn": "MiddleName"  },
+          { "name": "LastName",     "dataType": "string",  "sourceColumn": "LastName"    },
+          { "name": "CompanyName",  "dataType": "string",  "sourceColumn": "CompanyName" },
+          { "name": "SalesPerson",  "dataType": "string",  "sourceColumn": "SalesPerson" },
+          { "name": "EmailAddress", "dataType": "string",  "sourceColumn": "EmailAddress"},
+          { "name": "Phone",        "dataType": "string",  "sourceColumn": "Phone"       },
+          { "name": "ModifiedDate", "dataType": "dateTime","sourceColumn": "ModifiedDate"}
+        ],
+        "measures": [
+          {
+            "name": "# Customers",
+            "expression": "DISTINCTCOUNT( Customer[CustomerID] )",
+            "formatString": "#,0"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Customer",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Fabric.Lakehouse(\"\"),",
+                "    Navigation = Source{[Schema=\"SalesLT\",Item=\"Customer\"]}[Data]",
+                "in",
+                "    Navigation"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Product",
+        "columns": [
+          { "name": "ProductID",         "dataType": "int64",   "sourceColumn": "ProductID",         "isKey": true },
+          { "name": "Name",              "dataType": "string",  "sourceColumn": "Name"               },
+          { "name": "ProductNumber",     "dataType": "string",  "sourceColumn": "ProductNumber"      },
+          { "name": "Color",             "dataType": "string",  "sourceColumn": "Color"              },
+          { "name": "StandardCost",      "dataType": "decimal", "sourceColumn": "StandardCost"       },
+          { "name": "ListPrice",         "dataType": "decimal", "sourceColumn": "ListPrice"          },
+          { "name": "Size",              "dataType": "string",  "sourceColumn": "Size"               },
+          { "name": "Weight",            "dataType": "decimal", "sourceColumn": "Weight"             },
+          { "name": "ProductCategoryID", "dataType": "int64",   "sourceColumn": "ProductCategoryID"  },
+          { "name": "ProductModelID",    "dataType": "int64",   "sourceColumn": "ProductModelID"     },
+          { "name": "SellStartDate",     "dataType": "dateTime","sourceColumn": "SellStartDate"      },
+          { "name": "SellEndDate",       "dataType": "dateTime","sourceColumn": "SellEndDate"        },
+          { "name": "ModifiedDate",      "dataType": "dateTime","sourceColumn": "ModifiedDate"       }
+        ],
+        "measures": [
+          {
+            "name": "# Products",
+            "expression": "DISTINCTCOUNT( Product[ProductID] )",
+            "formatString": "#,0"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Product",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Fabric.Lakehouse(\"\"),",
+                "    Navigation = Source{[Schema=\"SalesLT\",Item=\"Product\"]}[Data]",
+                "in",
+                "    Navigation"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "ProductCategory",
+        "columns": [
+          { "name": "ProductCategoryID",       "dataType": "int64",  "sourceColumn": "ProductCategoryID",       "isKey": true },
+          { "name": "ParentProductCategoryID", "dataType": "int64",  "sourceColumn": "ParentProductCategoryID" },
+          { "name": "Name",                    "dataType": "string", "sourceColumn": "Name"                    },
+          { "name": "ModifiedDate",            "dataType": "dateTime","sourceColumn": "ModifiedDate"           }
+        ],
+        "partitions": [
+          {
+            "name": "ProductCategory",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Fabric.Lakehouse(\"\"),",
+                "    Navigation = Source{[Schema=\"SalesLT\",Item=\"ProductCategory\"]}[Data]",
+                "in",
+                "    Navigation"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "SalesOrderHeader",
+        "columns": [
+          { "name": "SalesOrderID",      "dataType": "int64",   "sourceColumn": "SalesOrderID",      "isKey": true },
+          { "name": "OrderDate",         "dataType": "dateTime","sourceColumn": "OrderDate"          },
+          { "name": "DueDate",           "dataType": "dateTime","sourceColumn": "DueDate"            },
+          { "name": "ShipDate",          "dataType": "dateTime","sourceColumn": "ShipDate"           },
+          { "name": "Status",            "dataType": "int64",   "sourceColumn": "Status"             },
+          { "name": "OnlineOrderFlag",   "dataType": "boolean", "sourceColumn": "OnlineOrderFlag"    },
+          { "name": "PurchaseOrderNumber","dataType": "string", "sourceColumn": "PurchaseOrderNumber"},
+          { "name": "AccountNumber",     "dataType": "string",  "sourceColumn": "AccountNumber"      },
+          { "name": "CustomerID",        "dataType": "int64",   "sourceColumn": "CustomerID"         },
+          { "name": "ShipToAddressID",   "dataType": "int64",   "sourceColumn": "ShipToAddressID"    },
+          { "name": "BillToAddressID",   "dataType": "int64",   "sourceColumn": "BillToAddressID"    },
+          { "name": "ShipMethod",        "dataType": "string",  "sourceColumn": "ShipMethod"         },
+          { "name": "SubTotal",          "dataType": "decimal", "sourceColumn": "SubTotal"           },
+          { "name": "TaxAmt",            "dataType": "decimal", "sourceColumn": "TaxAmt"             },
+          { "name": "Freight",           "dataType": "decimal", "sourceColumn": "Freight"            },
+          { "name": "ModifiedDate",      "dataType": "dateTime","sourceColumn": "ModifiedDate"       }
+        ],
+        "measures": [
+          {
+            "name": "# Orders",
+            "expression": "DISTINCTCOUNT( SalesOrderHeader[SalesOrderID] )",
+            "formatString": "#,0"
+          },
+          {
+            "name": "Total SubTotal",
+            "expression": "SUM( SalesOrderHeader[SubTotal] )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00"
+          },
+          {
+            "name": "Total Tax",
+            "expression": "SUM( SalesOrderHeader[TaxAmt] )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00"
+          },
+          {
+            "name": "Total Freight",
+            "expression": "SUM( SalesOrderHeader[Freight] )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00"
+          },
+          {
+            "name": "Total Revenue",
+            "expression": "[Total SubTotal] + [Total Tax] + [Total Freight]",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "SalesOrderHeader",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Fabric.Lakehouse(\"\"),",
+                "    Navigation = Source{[Schema=\"SalesLT\",Item=\"SalesOrderHeader\"]}[Data]",
+                "in",
+                "    Navigation"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "SalesOrderDetail",
+        "columns": [
+          { "name": "SalesOrderID",      "dataType": "int64",   "sourceColumn": "SalesOrderID"   },
+          { "name": "SalesOrderDetailID","dataType": "int64",   "sourceColumn": "SalesOrderDetailID", "isKey": true },
+          { "name": "OrderQty",          "dataType": "int64",   "sourceColumn": "OrderQty"        },
+          { "name": "ProductID",         "dataType": "int64",   "sourceColumn": "ProductID"       },
+          { "name": "UnitPrice",         "dataType": "decimal", "sourceColumn": "UnitPrice"       },
+          { "name": "UnitPriceDiscount", "dataType": "decimal", "sourceColumn": "UnitPriceDiscount"},
+          { "name": "ModifiedDate",      "dataType": "dateTime","sourceColumn": "ModifiedDate"    }
+        ],
+        "measures": [
+          {
+            "name": "Total Quantity",
+            "expression": "SUM( SalesOrderDetail[OrderQty] )",
+            "formatString": "#,0"
+          },
+          {
+            "name": "Total Line Revenue",
+            "expression": "SUMX( SalesOrderDetail, SalesOrderDetail[OrderQty] * SalesOrderDetail[UnitPrice] * ( 1 - SalesOrderDetail[UnitPriceDiscount] ) )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00"
+          },
+          {
+            "name": "Avg Unit Price",
+            "expression": "AVERAGE( SalesOrderDetail[UnitPrice] )",
+            "formatString": "\\$#,0.00;(\\$#,0.00);\\$#,0.00"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "SalesOrderDetail",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Source = Fabric.Lakehouse(\"\"),",
+                "    Navigation = Source{[Schema=\"SalesLT\",Item=\"SalesOrderDetail\"]}[Data]",
+                "in",
+                "    Navigation"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "SalesOrderHeader_Customer",
+        "fromTable": "SalesOrderHeader",
+        "fromColumn": "CustomerID",
+        "toTable": "Customer",
+        "toColumn": "CustomerID"
+      },
+      {
+        "name": "SalesOrderDetail_SalesOrderHeader",
+        "fromTable": "SalesOrderDetail",
+        "fromColumn": "SalesOrderID",
+        "toTable": "SalesOrderHeader",
+        "toColumn": "SalesOrderID"
+      },
+      {
+        "name": "SalesOrderDetail_Product",
+        "fromTable": "SalesOrderDetail",
+        "fromColumn": "ProductID",
+        "toTable": "Product",
+        "toColumn": "ProductID"
+      },
+      {
+        "name": "Product_ProductCategory",
+        "fromTable": "Product",
+        "fromColumn": "ProductCategoryID",
+        "toTable": "ProductCategory",
+        "toColumn": "ProductCategoryID"
+      }
+    ],
+    "annotations": [
+      {
+        "name": "PBIDesktopVersion",
+        "value": "2.136.0.0"
+      },
+      {
+        "name": "__PBI_TimeIntelligenceEnabled",
+        "value": "1"
+      }
+    ]
+  }
+}
