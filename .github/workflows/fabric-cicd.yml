@@ -6,6 +6,13 @@
 #   1. deploy-dev  — auto on push to main (no approval)
 #   2. deploy-qa   — after DEV succeeds, requires qa environment approval
 #   3. deploy-prod — after QA succeeds, requires prod environment approval
+#
+# Each deploy job runs these steps in order:
+#   a. Pre-flight check  — validates SP credentials & workspace access
+#   b. Deploy            — publishes workspace items via fabric-cicd
+#   c. Verify workspace  — lists deployed items via Fabric REST API
+#   d. Upload logs       — uploads fabric_cicd.error.log as an artifact
+#   e. Job summary       — writes a Markdown table to the run summary
 # ──────────────────────────────────────────────────────────────────────
 
 name: Fabric CI/CD
@@ -92,6 +99,32 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Verify Azure CLI service principal access
+        run: |
+          az login --service-principal \
+            --tenant "${TENANT_ID}" \
+            --username "${CLIENT_ID}" \
+            --password "${CLIENT_SECRET}" \
+            --output none
+          echo "Azure CLI login succeeded — tenant: ${TENANT_ID}, client: ${CLIENT_ID}"
+          az account show --output table
+        env:
+          TENANT_ID:     ${{ secrets.DEV_TENANT_ID || secrets.FABRIC_TENANT_ID }}
+          CLIENT_ID:     ${{ secrets.DEV_CLIENT_ID || secrets.FABRIC_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.DEV_CLIENT_SECRET || secrets.FABRIC_CLIENT_SECRET }}
+
+      - name: Pre-flight credential & workspace check
+        run: python deploy/preflight_check.py
+        env:
+          DEV_TENANT_ID:       ${{ secrets.DEV_TENANT_ID }}
+          DEV_CLIENT_ID:       ${{ secrets.DEV_CLIENT_ID }}
+          DEV_CLIENT_SECRET:   ${{ secrets.DEV_CLIENT_SECRET }}
+          FABRIC_TENANT_ID:    ${{ secrets.FABRIC_TENANT_ID }}
+          FABRIC_CLIENT_ID:    ${{ secrets.FABRIC_CLIENT_ID }}
+          FABRIC_CLIENT_SECRET: ${{ secrets.FABRIC_CLIENT_SECRET }}
+          TARGET_WORKSPACE_ID: ${{ secrets.DEV_WORKSPACE_ID }}
+          TARGET_ENVIRONMENT:  "DEV"
+
       - name: Deploy to DEV workspace
         run: python deploy/deploy_workspace.py
         env:
@@ -107,6 +140,16 @@ jobs:
           ITEMS_IN_SCOPE:      ${{ env.ITEMS_IN_SCOPE }}
           CLEAN_ORPHANS:       ${{ env.CLEAN_ORPHANS }}
 
+      - name: Verify deployed workspace items
+        if: success()
+        run: |
+          TOKEN=$(az account get-access-token \
+            --resource "https://api.fabric.microsoft.com" \
+            --query accessToken -o tsv)
+          FABRIC_ACCESS_TOKEN="$TOKEN" \
+          TARGET_WORKSPACE_ID="${{ secrets.DEV_WORKSPACE_ID }}" \
+          python deploy/list_workspace_items.py
+
       - name: Print fabric_cicd error log
         if: always()
         run: |
@@ -116,6 +159,14 @@ jobs:
           else
             echo "No fabric_cicd.error.log file found."
           fi
+
+      - name: Upload error log artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fabric-cicd-error-log-dev
+          path: fabric_cicd.error.log
+          if-no-files-found: ignore
 
       - name: Job summary
         if: always()
@@ -152,6 +203,32 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Verify Azure CLI service principal access
+        run: |
+          az login --service-principal \
+            --tenant "${TENANT_ID}" \
+            --username "${CLIENT_ID}" \
+            --password "${CLIENT_SECRET}" \
+            --output none
+          echo "Azure CLI login succeeded — tenant: ${TENANT_ID}, client: ${CLIENT_ID}"
+          az account show --output table
+        env:
+          TENANT_ID:     ${{ secrets.QA_TENANT_ID || secrets.FABRIC_TENANT_ID }}
+          CLIENT_ID:     ${{ secrets.QA_CLIENT_ID || secrets.FABRIC_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.QA_CLIENT_SECRET || secrets.FABRIC_CLIENT_SECRET }}
+
+      - name: Pre-flight credential & workspace check
+        run: python deploy/preflight_check.py
+        env:
+          QA_TENANT_ID:        ${{ secrets.QA_TENANT_ID }}
+          QA_CLIENT_ID:        ${{ secrets.QA_CLIENT_ID }}
+          QA_CLIENT_SECRET:    ${{ secrets.QA_CLIENT_SECRET }}
+          FABRIC_TENANT_ID:    ${{ secrets.FABRIC_TENANT_ID }}
+          FABRIC_CLIENT_ID:    ${{ secrets.FABRIC_CLIENT_ID }}
+          FABRIC_CLIENT_SECRET: ${{ secrets.FABRIC_CLIENT_SECRET }}
+          TARGET_WORKSPACE_ID: ${{ secrets.QA_WORKSPACE_ID }}
+          TARGET_ENVIRONMENT:  "QA"
+
       - name: Deploy to QA workspace
         run: python deploy/deploy_workspace.py
         env:
@@ -167,6 +244,16 @@ jobs:
           ITEMS_IN_SCOPE:      ${{ env.ITEMS_IN_SCOPE }}
           CLEAN_ORPHANS:       ${{ env.CLEAN_ORPHANS }}
 
+      - name: Verify deployed workspace items
+        if: success()
+        run: |
+          TOKEN=$(az account get-access-token \
+            --resource "https://api.fabric.microsoft.com" \
+            --query accessToken -o tsv)
+          FABRIC_ACCESS_TOKEN="$TOKEN" \
+          TARGET_WORKSPACE_ID="${{ secrets.QA_WORKSPACE_ID }}" \
+          python deploy/list_workspace_items.py
+
       - name: Print fabric_cicd error log
         if: always()
         run: |
@@ -176,6 +263,14 @@ jobs:
           else
             echo "No fabric_cicd.error.log file found."
           fi
+
+      - name: Upload error log artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fabric-cicd-error-log-qa
+          path: fabric_cicd.error.log
+          if-no-files-found: ignore
 
       - name: Job summary
         if: always()
@@ -212,6 +307,32 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Verify Azure CLI service principal access
+        run: |
+          az login --service-principal \
+            --tenant "${TENANT_ID}" \
+            --username "${CLIENT_ID}" \
+            --password "${CLIENT_SECRET}" \
+            --output none
+          echo "Azure CLI login succeeded — tenant: ${TENANT_ID}, client: ${CLIENT_ID}"
+          az account show --output table
+        env:
+          TENANT_ID:     ${{ secrets.PROD_TENANT_ID || secrets.FABRIC_TENANT_ID }}
+          CLIENT_ID:     ${{ secrets.PROD_CLIENT_ID || secrets.FABRIC_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.PROD_CLIENT_SECRET || secrets.FABRIC_CLIENT_SECRET }}
+
+      - name: Pre-flight credential & workspace check
+        run: python deploy/preflight_check.py
+        env:
+          PROD_TENANT_ID:      ${{ secrets.PROD_TENANT_ID }}
+          PROD_CLIENT_ID:      ${{ secrets.PROD_CLIENT_ID }}
+          PROD_CLIENT_SECRET:  ${{ secrets.PROD_CLIENT_SECRET }}
+          FABRIC_TENANT_ID:    ${{ secrets.FABRIC_TENANT_ID }}
+          FABRIC_CLIENT_ID:    ${{ secrets.FABRIC_CLIENT_ID }}
+          FABRIC_CLIENT_SECRET: ${{ secrets.FABRIC_CLIENT_SECRET }}
+          TARGET_WORKSPACE_ID: ${{ secrets.PROD_WORKSPACE_ID }}
+          TARGET_ENVIRONMENT:  "PROD"
+
       - name: Deploy to PROD workspace
         run: python deploy/deploy_workspace.py
         env:
@@ -227,6 +348,16 @@ jobs:
           ITEMS_IN_SCOPE:      ${{ env.ITEMS_IN_SCOPE }}
           CLEAN_ORPHANS:       ${{ env.CLEAN_ORPHANS }}
 
+      - name: Verify deployed workspace items
+        if: success()
+        run: |
+          TOKEN=$(az account get-access-token \
+            --resource "https://api.fabric.microsoft.com" \
+            --query accessToken -o tsv)
+          FABRIC_ACCESS_TOKEN="$TOKEN" \
+          TARGET_WORKSPACE_ID="${{ secrets.PROD_WORKSPACE_ID }}" \
+          python deploy/list_workspace_items.py
+
       - name: Print fabric_cicd error log
         if: always()
         run: |
@@ -236,6 +367,14 @@ jobs:
           else
             echo "No fabric_cicd.error.log file found."
           fi
+
+      - name: Upload error log artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fabric-cicd-error-log-prod
+          path: fabric_cicd.error.log
+          if-no-files-found: ignore
 
       - name: Job summary
         if: always()

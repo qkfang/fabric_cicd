@@ -9,6 +9,9 @@
 #      Mark secrets as secret variables.
 #   3. Optionally use per-environment service principals:
 #        DEV_TENANT_ID, DEV_CLIENT_ID, DEV_CLIENT_SECRET, etc.
+#   4. Each deploy stage runs a pre-flight check (deploy/preflight_check.py) that
+#      validates SP credentials and workspace access before deploying.  If it fails,
+#      fix permissions as described in the pre-flight output and re-run the pipeline.
 
 trigger:
   branches:
@@ -104,6 +107,17 @@ stages:
 
                 - script: |
                     source $(Agent.TempDirectory)/venv/bin/activate
+                    python deploy/preflight_check.py
+                  displayName: Pre-flight credential & workspace check
+                  env:
+                    TARGET_ENVIRONMENT: DEV
+                    TARGET_WORKSPACE_ID: $(DEV_WORKSPACE_ID)
+                    FABRIC_TENANT_ID: $(FABRIC_TENANT_ID)
+                    FABRIC_CLIENT_ID: $(FABRIC_CLIENT_ID)
+                    FABRIC_CLIENT_SECRET: $(FABRIC_CLIENT_SECRET)
+
+                - script: |
+                    source $(Agent.TempDirectory)/venv/bin/activate
                     python deploy/deploy_workspace.py
                   displayName: Deploy to DEV
                   env:
@@ -112,6 +126,44 @@ stages:
                     FABRIC_TENANT_ID: $(FABRIC_TENANT_ID)
                     FABRIC_CLIENT_ID: $(FABRIC_CLIENT_ID)
                     FABRIC_CLIENT_SECRET: $(FABRIC_CLIENT_SECRET)
+
+                - script: |
+                    TOKEN=$(az account get-access-token \
+                      --resource "https://api.fabric.microsoft.com" \
+                      --query accessToken -o tsv 2>/dev/null || true)
+                    if [ -n "$TOKEN" ]; then
+                      echo "=== Fabric workspace items after DEV deployment ==="
+                      curl -sSf \
+                        -H "Authorization: Bearer $TOKEN" \
+                        "https://api.fabric.microsoft.com/v1/workspaces/$(DEV_WORKSPACE_ID)/items" \
+                      | python$(pythonVersion) -c "
+                    import json, sys
+                    data = json.load(sys.stdin)
+                    items = data.get('value', [])
+                    print(f'Total items: {len(items)}')
+                    for it in items:
+                        print(f\"  {it.get('type','?'):20s}  {it.get('displayName','?')}\")
+                    " || echo "Could not list items."
+                    else
+                      echo "Skipping workspace item listing — az CLI not authenticated."
+                    fi
+                  displayName: Verify deployed workspace items (DEV)
+                  condition: succeeded()
+
+                - script: |
+                    if [ -f fabric_cicd.error.log ]; then
+                      echo "=== fabric_cicd.error.log ==="
+                      cat fabric_cicd.error.log
+                    else
+                      echo "No fabric_cicd.error.log file found."
+                    fi
+                  displayName: Print fabric_cicd error log
+                  condition: always()
+
+                - publish: fabric_cicd.error.log
+                  artifact: fabric-cicd-error-log-dev
+                  displayName: Upload error log artifact
+                  condition: always()
 
   # ──────────────────────────────────────────────────
   # Deploy to QA (requires approval on the QA environment)
@@ -147,6 +199,17 @@ stages:
 
                 - script: |
                     source $(Agent.TempDirectory)/venv/bin/activate
+                    python deploy/preflight_check.py
+                  displayName: Pre-flight credential & workspace check
+                  env:
+                    TARGET_ENVIRONMENT: QA
+                    TARGET_WORKSPACE_ID: $(QA_WORKSPACE_ID)
+                    FABRIC_TENANT_ID: $(FABRIC_TENANT_ID)
+                    FABRIC_CLIENT_ID: $(FABRIC_CLIENT_ID)
+                    FABRIC_CLIENT_SECRET: $(FABRIC_CLIENT_SECRET)
+
+                - script: |
+                    source $(Agent.TempDirectory)/venv/bin/activate
                     python deploy/deploy_workspace.py
                   displayName: Deploy to QA
                   env:
@@ -155,6 +218,44 @@ stages:
                     FABRIC_TENANT_ID: $(FABRIC_TENANT_ID)
                     FABRIC_CLIENT_ID: $(FABRIC_CLIENT_ID)
                     FABRIC_CLIENT_SECRET: $(FABRIC_CLIENT_SECRET)
+
+                - script: |
+                    TOKEN=$(az account get-access-token \
+                      --resource "https://api.fabric.microsoft.com" \
+                      --query accessToken -o tsv 2>/dev/null || true)
+                    if [ -n "$TOKEN" ]; then
+                      echo "=== Fabric workspace items after QA deployment ==="
+                      curl -sSf \
+                        -H "Authorization: Bearer $TOKEN" \
+                        "https://api.fabric.microsoft.com/v1/workspaces/$(QA_WORKSPACE_ID)/items" \
+                      | python$(pythonVersion) -c "
+                    import json, sys
+                    data = json.load(sys.stdin)
+                    items = data.get('value', [])
+                    print(f'Total items: {len(items)}')
+                    for it in items:
+                        print(f\"  {it.get('type','?'):20s}  {it.get('displayName','?')}\")
+                    " || echo "Could not list items."
+                    else
+                      echo "Skipping workspace item listing — az CLI not authenticated."
+                    fi
+                  displayName: Verify deployed workspace items (QA)
+                  condition: succeeded()
+
+                - script: |
+                    if [ -f fabric_cicd.error.log ]; then
+                      echo "=== fabric_cicd.error.log ==="
+                      cat fabric_cicd.error.log
+                    else
+                      echo "No fabric_cicd.error.log file found."
+                    fi
+                  displayName: Print fabric_cicd error log
+                  condition: always()
+
+                - publish: fabric_cicd.error.log
+                  artifact: fabric-cicd-error-log-qa
+                  displayName: Upload error log artifact
+                  condition: always()
 
   # ──────────────────────────────────────────────────
   # Deploy to PROD (requires approval on the PROD environment)
@@ -190,6 +291,17 @@ stages:
 
                 - script: |
                     source $(Agent.TempDirectory)/venv/bin/activate
+                    python deploy/preflight_check.py
+                  displayName: Pre-flight credential & workspace check
+                  env:
+                    TARGET_ENVIRONMENT: PROD
+                    TARGET_WORKSPACE_ID: $(PROD_WORKSPACE_ID)
+                    FABRIC_TENANT_ID: $(FABRIC_TENANT_ID)
+                    FABRIC_CLIENT_ID: $(FABRIC_CLIENT_ID)
+                    FABRIC_CLIENT_SECRET: $(FABRIC_CLIENT_SECRET)
+
+                - script: |
+                    source $(Agent.TempDirectory)/venv/bin/activate
                     python deploy/deploy_workspace.py
                   displayName: Deploy to PROD
                   env:
@@ -198,3 +310,41 @@ stages:
                     FABRIC_TENANT_ID: $(FABRIC_TENANT_ID)
                     FABRIC_CLIENT_ID: $(FABRIC_CLIENT_ID)
                     FABRIC_CLIENT_SECRET: $(FABRIC_CLIENT_SECRET)
+
+                - script: |
+                    TOKEN=$(az account get-access-token \
+                      --resource "https://api.fabric.microsoft.com" \
+                      --query accessToken -o tsv 2>/dev/null || true)
+                    if [ -n "$TOKEN" ]; then
+                      echo "=== Fabric workspace items after PROD deployment ==="
+                      curl -sSf \
+                        -H "Authorization: Bearer $TOKEN" \
+                        "https://api.fabric.microsoft.com/v1/workspaces/$(PROD_WORKSPACE_ID)/items" \
+                      | python$(pythonVersion) -c "
+                    import json, sys
+                    data = json.load(sys.stdin)
+                    items = data.get('value', [])
+                    print(f'Total items: {len(items)}')
+                    for it in items:
+                        print(f\"  {it.get('type','?'):20s}  {it.get('displayName','?')}\")
+                    " || echo "Could not list items."
+                    else
+                      echo "Skipping workspace item listing — az CLI not authenticated."
+                    fi
+                  displayName: Verify deployed workspace items (PROD)
+                  condition: succeeded()
+
+                - script: |
+                    if [ -f fabric_cicd.error.log ]; then
+                      echo "=== fabric_cicd.error.log ==="
+                      cat fabric_cicd.error.log
+                    else
+                      echo "No fabric_cicd.error.log file found."
+                    fi
+                  displayName: Print fabric_cicd error log
+                  condition: always()
+
+                - publish: fabric_cicd.error.log
+                  artifact: fabric-cicd-error-log-prod
+                  displayName: Upload error log artifact
+                  condition: always()

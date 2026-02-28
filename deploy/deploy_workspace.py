@@ -21,6 +21,8 @@ from datetime import datetime, timezone
 from azure.identity import ClientSecretCredential
 from fabric_cicd import FabricWorkspace, publish_all_items, unpublish_all_orphan_items
 
+from deploy._credential import build_credential
+
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
@@ -79,34 +81,41 @@ def _parse_items_in_scope(raw: str | None) -> list[str]:
 
 
 def _build_credential(environment: str) -> ClientSecretCredential:
-    """Build a ClientSecretCredential from environment-specific variables.
+    """Build a ClientSecretCredential and eagerly validate it.
 
-    Looks for <ENV>_TENANT_ID, <ENV>_CLIENT_ID, <ENV>_CLIENT_SECRET first
-    (e.g. DEV_TENANT_ID), then falls back to the generic FABRIC_* variables.
-    This allows per-environment service principals for least-privilege isolation.
+    Uses the shared helper in deploy._credential (which reads
+    <ENV>_TENANT_ID / <ENV>_CLIENT_ID / <ENV>_CLIENT_SECRET then falls
+    back to FABRIC_* variables) and then validates token acquisition so
+    auth errors surface before the fabric-cicd library is invoked.
     """
-    env_prefix = environment.upper()
-    tenant_id = (
-        os.environ.get(f"{env_prefix}_TENANT_ID")
-        or _env("FABRIC_TENANT_ID")
-    )
-    client_id = (
-        os.environ.get(f"{env_prefix}_CLIENT_ID")
-        or _env("FABRIC_CLIENT_ID")
-    )
-    client_secret = (
-        os.environ.get(f"{env_prefix}_CLIENT_SECRET")
-        or _env("FABRIC_CLIENT_SECRET")
-    )
+    credential, tenant_id, client_id = build_credential(environment)
     logger.info(
         "Authenticating service principal for %s (tenant=%s, client=%s).",
         environment, tenant_id, client_id,
     )
-    return ClientSecretCredential(
-        tenant_id=tenant_id,
-        client_id=client_id,
-        client_secret=client_secret,
-    )
+
+    # Eagerly validate the credential so auth errors are caught with helpful
+    # diagnostics before the fabric-cicd library surfaces a generic TokenError.
+    try:
+        credential.get_token("https://api.fabric.microsoft.com/.default")
+        logger.info("Service principal token acquired successfully.")
+    except Exception as exc:  # noqa: BLE001
+        logger.error(
+            "Failed to acquire AAD token for environment %s.\n"
+            "  Tenant ID  : %s\n"
+            "  Client ID  : %s\n"
+            "  Cause      : %s\n"
+            "Hint: Run  python deploy/preflight_check.py  for step-by-step diagnosis.\n"
+            "Common fixes:\n"
+            "  • Ensure TENANT_ID matches the Azure AD tenant that owns the SP.\n"
+            "  • Verify CLIENT_ID and CLIENT_SECRET are correct and not expired.\n"
+            "  • Add the SP to the Fabric workspace (Contributor role) via the\n"
+            "    Fabric portal → Workspace settings → Manage access.",
+            environment, tenant_id, client_id, exc,
+        )
+        sys.exit(1)
+
+    return credential
 
 
 # ---------------------------------------------------------------------------
