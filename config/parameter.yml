@@ -13,6 +13,29 @@
 #   2. The DEV values should match what is already in the exported
 #      workspace/ folder (the Git-as-source-of-truth baseline).
 #   3. QA and PROD values are the target equivalents in those environments.
+#
+# SQL DATABASE SETUP:
+#   The semantic model (Sales_Report.SemanticModel/model.bim) connects to
+#   the Fabric SQL Database using Sql.Database() in Power Query M.
+#   The server placeholder "dev-sql-server.database.windows.net" is
+#   replaced per-environment by the find_replace rules below.
+#
+#   For Microsoft Fabric SQL Database, the SQL Analytics Endpoint URL can
+#   be found in the Fabric portal:
+#     Workspace → SQL Database item → Settings → Connection strings → Server
+#   It typically looks like:
+#     <workspace-guid>.datawarehouse.fabric.microsoft.com
+#   or for Azure SQL:
+#     <server-name>.database.windows.net
+#
+#   The database name "FSI_DB_01" is the same across environments because
+#   each environment workspace has its own SQL Database instance with the
+#   same item name. Only the server endpoint changes per environment.
+#
+#   After deploying the semantic model, configure the SQL connection
+#   credentials in the Fabric portal:
+#     Workspace → Sales_Report semantic model → Settings → Data source credentials
+#     → select the SQL data source → set authentication (OAuth2 / Service Principal)
 # ────────────────────────────────────────────────────────────────────
 
 # ── find_replace ─────────────────────────────────────────────────────
@@ -24,7 +47,8 @@ find_replace:
     "00000000-0000-0000-0000-000000000001": "00000000-0000-0000-0000-000000000001"
     # Lakehouse ID in DEV
     "00000000-0000-0000-0000-00000000000A": "00000000-0000-0000-0000-00000000000A"
-    # SQL connection string (DEV)
+    # SQL Analytics Endpoint for the DEV Fabric SQL Database
+    # Replace with your actual DEV server endpoint from the Fabric portal
     "dev-sql-server.database.windows.net": "dev-sql-server.database.windows.net"
 
   QA:
@@ -32,7 +56,8 @@ find_replace:
     "00000000-0000-0000-0000-000000000001": "00000000-0000-0000-0000-000000000002"
     # Map DEV lakehouse ID → QA lakehouse ID
     "00000000-0000-0000-0000-00000000000A": "00000000-0000-0000-0000-00000000000B"
-    # SQL connection string (QA)
+    # SQL Analytics Endpoint for the QA Fabric SQL Database
+    # Replace with your actual QA server endpoint from the Fabric portal
     "dev-sql-server.database.windows.net": "qa-sql-server.database.windows.net"
 
   PROD:
@@ -40,5 +65,6 @@ find_replace:
     "00000000-0000-0000-0000-000000000001": "00000000-0000-0000-0000-000000000003"
     # Map DEV lakehouse ID → PROD lakehouse ID
     "00000000-0000-0000-0000-00000000000A": "00000000-0000-0000-0000-00000000000C"
-    # SQL connection string (PROD)
+    # SQL Analytics Endpoint for the PROD Fabric SQL Database
+    # Replace with your actual PROD server endpoint from the Fabric portal
     "dev-sql-server.database.windows.net": "prod-sql-server.database.windows.net"
