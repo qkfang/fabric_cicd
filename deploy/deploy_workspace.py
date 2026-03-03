@@ -36,11 +36,14 @@ logger = logging.getLogger("fabric-cicd-deploy")
 # Constants
 # ---------------------------------------------------------------------------
 DEFAULT_REPO_DIR = "./workspace"
+DEFAULT_PARAMETER_FILE = "./config/parameter.yml"
 DEFAULT_ITEM_TYPES = [
     "Notebook",
     "SemanticModel",
     "Report",
     "Environment",
+    "SQLDatabase",
+    "Lakehouse",
 ]
 
 # DataPipeline is only supported with User Identity (UPN) authentication.
@@ -119,6 +122,7 @@ def deploy(
     repo_dir: str,
     item_types: list[str],
     clean_orphans: bool,
+    parameter_file: str | None = None,
 ) -> None:
     """Run a full deterministic deployment to the target workspace."""
 
@@ -129,6 +133,7 @@ def deploy(
     logger.info("  Repo directory: %s", os.path.abspath(repo_dir))
     logger.info("  Item types    : %s", ", ".join(item_types))
     logger.info("  Clean orphans : %s", clean_orphans)
+    logger.info("  Parameter file: %s", parameter_file or "(auto-detect)")
     logger.info("  Git commit    : %s", os.environ.get("GITHUB_SHA", "local"))
     logger.info("=" * 60)
 
@@ -141,6 +146,7 @@ def deploy(
         repository_directory=repo_dir,
         item_type_in_scope=item_types,
         token_credential=credential,
+        parameter_file_path=parameter_file,
     )
 
     # Publish all items
@@ -176,6 +182,7 @@ def main() -> None:
         sys.exit(1)
     environment = environment.upper()
     repo_dir = _env("REPO_DIR", required=False, default=DEFAULT_REPO_DIR)
+    parameter_file = _env("PARAMETER_FILE", required=False, default=DEFAULT_PARAMETER_FILE)
     items_in_scope = _parse_items_in_scope(_env("ITEMS_IN_SCOPE", required=False))
     clean_orphans = _parse_bool(_env("CLEAN_ORPHANS", required=False, default="false"))
 
@@ -186,6 +193,7 @@ def main() -> None:
             repo_dir=repo_dir,
             item_types=items_in_scope,
             clean_orphans=clean_orphans,
+            parameter_file=parameter_file,
         )
     except Exception:
         logger.exception("Deployment failed.")

@@ -40,31 +40,34 @@
 
 # ── find_replace ─────────────────────────────────────────────────────
 # Performs literal string replacement across all item definition files.
+# Each entry needs a find_value and a replace_value dict keyed by environment.
 # Use this for workspace IDs, lakehouse IDs, connection IDs, etc.
 find_replace:
-  DEV:
-    # Workspace ID for the DEV environment (source / baseline)
-    "00000000-0000-0000-0000-000000000001": "00000000-0000-0000-0000-000000000001"
-    # Lakehouse ID in DEV
-    "00000000-0000-0000-0000-00000000000A": "00000000-0000-0000-0000-00000000000A"
-    # SQL Analytics Endpoint for the DEV Fabric SQL Database
-    # Replace with your actual DEV server endpoint from the Fabric portal
-    "dev-sql-server.database.windows.net": "dev-sql-server.database.windows.net"
+  # Workspace ID (source / baseline is the DEV value)
+  - find_value: "334687d9-c5a3-4af6-a9b1-9c02bad79934"
+    replace_value:
+      DEV: "334687d9-c5a3-4af6-a9b1-9c02bad79934"
+      QA: "<QA_WORKSPACE_ID>"
+      PROD: "<PROD_WORKSPACE_ID>"
 
-  QA:
-    # Map DEV workspace ID → QA workspace ID
-    "00000000-0000-0000-0000-000000000001": "00000000-0000-0000-0000-000000000002"
-    # Map DEV lakehouse ID → QA lakehouse ID
-    "00000000-0000-0000-0000-00000000000A": "00000000-0000-0000-0000-00000000000B"
-    # SQL Analytics Endpoint for the QA Fabric SQL Database
-    # Replace with your actual QA server endpoint from the Fabric portal
-    "dev-sql-server.database.windows.net": "qa-sql-server.database.windows.net"
+  # Default lakehouse ID (referenced by Notebook_MockData)
+  - find_value: "49f3e9cc-39cc-49b9-8807-0d33674b04b5"
+    replace_value:
+      DEV: "49f3e9cc-39cc-49b9-8807-0d33674b04b5"
+      QA: "<QA_LAKEHOUSE_ID>"
+      PROD: "<PROD_LAKEHOUSE_ID>"
 
-  PROD:
-    # Map DEV workspace ID → PROD workspace ID
-    "00000000-0000-0000-0000-000000000001": "00000000-0000-0000-0000-000000000003"
-    # Map DEV lakehouse ID → PROD lakehouse ID
-    "00000000-0000-0000-0000-00000000000A": "00000000-0000-0000-0000-00000000000C"
-    # SQL Analytics Endpoint for the PROD Fabric SQL Database
-    # Replace with your actual PROD server endpoint from the Fabric portal
-    "dev-sql-server.database.windows.net": "prod-sql-server.database.windows.net"
+  # Shortcuts target lakehouse ID (referenced by SalesLakehouse shortcuts)
+  - find_value: "c0cec3c6-bff6-8a77-47b1-ab19d15a52cc"
+    replace_value:
+      DEV: "c0cec3c6-bff6-8a77-47b1-ab19d15a52cc"
+      QA: "<QA_SHORTCUTS_LAKEHOUSE_ID>"
+      PROD: "<PROD_SHORTCUTS_LAKEHOUSE_ID>"
+
+  # SQL Analytics Endpoint for the Fabric SQL Database
+  # Replace with your actual server endpoints from the Fabric portal
+  - find_value: "dev-sql-server.database.windows.net"
+    replace_value:
+      DEV: "dev-sql-server.database.windows.net"
+      QA: "qa-sql-server.database.windows.net"
+      PROD: "prod-sql-server.database.windows.net"
